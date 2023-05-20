@@ -26,7 +26,7 @@ QQMUSIC_API = "https://u.y.qq.com/cgi-bin/musicu.fcg"
 def show_qrcode(img_data):
     """显示二维码"""
     img = Image.open(img_data)
-    if sys.platform == "win32" or sys.platform == 'darwin':
+    if sys.platform == "win32" or sys.platform == "darwin":
         img.show()
     else:
         img = img.resize((60, 60))
@@ -174,16 +174,16 @@ class QQLogin:
             self.g_tk = get_token(session.cookies.get("p_skey"))
             params = {
                 "Referer": "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id"
-                           "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
-                           "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
-                           "&use_customer_cb=0&state=state&display=pc",
+                "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
+                "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
+                "&use_customer_cb=0&state=state&display=pc",
                 "Content-Type": "application/x-www-form-urlencoded",
             }
             data = {
                 "response_type": "code",
                 "client_id": "100497308",
                 "redirect_uri": "https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https://y.qq.com"
-                                "/#&use_customer_cb=0",
+                "/#&use_customer_cb=0",
                 "scope": "",
                 "state": "state",
                 "switch": "",
@@ -196,7 +196,11 @@ class QQLogin:
                 "ui": self.uuid,
             }
             response = post(
-                LOGIN_AUTHORIZE, params=params, data=data, allow_redirects=False, verify=False
+                LOGIN_AUTHORIZE,
+                params=params,
+                data=data,
+                allow_redirects=False,
+                verify=False,
             )
             if response == -1:
                 return -1
@@ -207,13 +211,18 @@ class QQLogin:
                 return -1
             self.g_tk = get_token(session.cookies.get("p_skey"))
             code = re.findall(r"(?<=code=)(.+?)(?=&)", location)[0]
-            headers = {'content-type': 'application/x-www-form-urlencoded', 'Accept-Encoding': 'gzip, deflate, br'}
-            data = {"comm": {"g_tk": self.g_tk, "platform": "yqq", "ct": 24, "cv": 0},
-                    "req": {"module": "QQConnectLogin.LoginServer",
-                            "method": "QQLogin",
-                            "param": {"code": code}
-                            }
-                    }
+            headers = {
+                "content-type": "application/x-www-form-urlencoded",
+                "Accept-Encoding": "gzip, deflate, br",
+            }
+            data = {
+                "comm": {"g_tk": self.g_tk, "platform": "yqq", "ct": 24, "cv": 0},
+                "req": {
+                    "module": "QQConnectLogin.LoginServer",
+                    "method": "QQLogin",
+                    "param": {"code": code},
+                },
+            }
             print(data)
             response = post(QQMUSIC_API, data=json.dumps(data), headers=headers)
             print(session.headers.items())
