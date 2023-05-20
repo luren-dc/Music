@@ -3,7 +3,9 @@ import re
 import sys
 import time
 from io import BytesIO
+
 from PIL import Image
+
 from .http import (
     get,
     post,
@@ -23,9 +25,8 @@ QQMUSIC_API = "https://u.y.qq.com/cgi-bin/musicu.fcg"
 def show_qrcode(img_data):
     """显示二维码"""
     img = Image.open(img_data)
-    if sys.platform == "win32" or sys.platform == "darwin":
+    if sys.platform == "win32" or sys.platform == 'darwin':
         img.show()
-        img.close()
     else:
         img = img.resize((60, 60))
         width, height = img.size
@@ -45,7 +46,7 @@ def show_qrcode(img_data):
                         char = " "
                 print(char, end="")
             print()
-        img.close()
+    img.close()
 
 
 def get_token(p_skey):
@@ -172,16 +173,16 @@ class QQLogin:
             self.g_tk = get_token(session.cookies.get("p_skey"))
             params = {
                 "Referer": "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id"
-                "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
-                "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
-                "&use_customer_cb=0&state=state&display=pc",
+                           "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
+                           "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
+                           "&use_customer_cb=0&state=state&display=pc",
                 "Content-Type": "application/x-www-form-urlencoded",
             }
             data = {
                 "response_type": "code",
                 "client_id": "100497308",
                 "redirect_uri": "https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https://y.qq.com"
-                "/#&use_customer_cb=0",
+                                "/#&use_customer_cb=0",
                 "scope": "",
                 "state": "state",
                 "switch": "",
@@ -217,7 +218,7 @@ class QQLogin:
             return 1
         else:
             return -1
-            
+
     def check_login(self):
         """检测登陆状态"""
         pass

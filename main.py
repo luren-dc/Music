@@ -1,3 +1,4 @@
+from multiprocessing import Process
 import time
 from music.uitls import login
 
@@ -8,10 +9,9 @@ def login_music():
     img = qq.get_qrcode()
     if img == -1:
         return
-    login.show_qrcode(img)
+    Process(target=login.show_qrcode, args=(img,)).start()
     count_error = 0
     while True:
-        time.sleep(1)
         state = qq.check_state()
         print("\r" + " " * 20 + "\r", end="")
         if state == 4:
@@ -36,13 +36,13 @@ def login_music():
 
 def main():
     print(
-        """\033[34m.___  ___.  __    __       _______. __    ______ 
-|   \/   | |  |  |  |     /       ||  |  /      |
-|  \  /  | |  |  |  |    |   (----`|  | |  ,----'
-|  |\/|  | |  |  |  |     \   \    |  | |  |     
-|  |  |  | |  `--'  | .----)   |   |  | |  `----.
-|__|  |__|  \______/  |_______/    |__|  \______|\033[0m
-    """
+        "\033[34m.___  ___.  __    __       _______. __    ______ \n"
+        "|   \/   | |  |  |  |     /       ||  |  /      |\n"
+        "|  \  /  | |  |  |  |    |   (----`|  | |  ,----'\n"
+        "|  |\/|  | |  |  |  |     \   \    |  | |  |     \n"
+        "|  |  |  | |  `--'  | .----)   |   |  | |  `----.\n"
+        "|__|  |__|  \______/  |_______/    |__|  \______|\033[0m\n"
+        "    "
     )
     while True:
         if login_music() == -1:
