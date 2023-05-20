@@ -3,7 +3,6 @@ import re
 import sys
 import time
 from io import BytesIO
-
 from PIL import Image
 from .http import (
     get,
@@ -15,18 +14,20 @@ from .http import (
 QQMUSIC_QRSHOW = "https://ssl.ptlogin2.qq.com/ptqrshow"
 # 检验二维码状态
 QQMUSIC_PT = "https://xui.ptlogin2.qq.com/cgi-bin/xlogin"
-# 验证
+# 登陆验证
 QQMUSIC_PTQR = "https://ssl.ptlogin2.qq.com/ptqrlogin"
 LOGIN_AUTHORIZE = "https://graph.qq.com/oauth2.0/authorize"
+QQMUSIC_API = "https://u.y.qq.com/cgi-bin/musicu.fcg"
 
 
 def show_qrcode(img_data):
     """显示二维码"""
-    img = Image.open(img_data).resize((90, 90))
-    if sys.platform == "win32" or "darwin":
+    img = Image.open(img_data)
+    if sys.platform == "win32" or sys.platform == "darwin":
         img.show()
         img.close()
     else:
+        img = img.resize((60, 60))
         width, height = img.size
         for y in range(0, height, 2):
             for x in range(width):
@@ -57,16 +58,14 @@ def get_token(p_skey):
 
 def get_uuid():
     """Generates a random UUID."""
-    uuid_string = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+    uuid_string = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
     def callback(c):
         r = random.randint(0, 15)
         v = r if c == "x" else (r & 0x3 | 0x8)
         return hex(v)[2:]
 
-    return "".join(
-        [callback(c) if c in ["x", "y"] else c for c in uuid_string]
-    ).upper()
+    return "".join([callback(c) if c in ["x", "y"] else c for c in uuid_string]).upper()
 
 
 def get_ptqrtoken(qrsig):
@@ -88,8 +87,8 @@ class QQLogin:
         self.uuid = None
         self.qqmusic_skey = None
 
-    # 获取登录二维码
     def get_qrcode(self) -> int | BytesIO:
+        """获取登录二维码"""
         self.uuid = get_uuid()
         params = {
             "appid": "716027609",
@@ -108,7 +107,6 @@ class QQLogin:
         if get(QQMUSIC_PT, params=params) == -1:
             return -1
         self.pt_login_sig = session.cookies.get("pt_login_sig")
-        # 获取二维码
         params = {
             "appid": "716027609",
             "e": "2",
@@ -130,6 +128,7 @@ class QQLogin:
         return BytesIO(response.content)
 
     def check_state(self) -> int:
+        """获取登录二维码状态"""
         if self.url_refresh:
             return self.qq_number
         params = {
@@ -163,25 +162,26 @@ class QQLogin:
         else:
             self.qq_number = re.findall(r"&uin=(.+?)&service", response.text)[0]
             self.url_refresh = re.findall(r"'(https:.*?)'", response.text)[0]
-            self.g_tk = get_token(session.cookies.get("p_skey"))
             return self.qq_number
 
     def authorize(self):
+        """登录验证"""
         if self.url_refresh is not None:
             if get(self.url_refresh, allow_redirects=False, verify=False) == -1:
                 return -1
+            self.g_tk = get_token(session.cookies.get("p_skey"))
             params = {
                 "Referer": "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id"
-                           "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
-                           "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
-                           "&use_customer_cb=0&state=state&display=pc",
+                "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
+                "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
+                "&use_customer_cb=0&state=state&display=pc",
                 "Content-Type": "application/x-www-form-urlencoded",
             }
             data = {
                 "response_type": "code",
                 "client_id": "100497308",
                 "redirect_uri": "https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https://y.qq.com"
-                                "/#&use_customer_cb=0",
+                "/#&use_customer_cb=0",
                 "scope": "",
                 "state": "state",
                 "switch": "",
@@ -193,14 +193,31 @@ class QQLogin:
                 "auth_time": str(int(time.time())),
                 "ui": self.uuid,
             }
-            if (
-                    post(LOGIN_AUTHORIZE, data=data, allow_redirects=False, verify=False)
-                    == -1
-            ):
+            response = post(
+                LOGIN_AUTHORIZE, data=data, allow_redirects=False, verify=False
+            )
+            if response == -1:
                 return -1
+            location = response.headers.get("Location")
+            if "code" not in location:
+                return -1
+            code = re.findall(r"(?<=code=)(.+?)(?=&)", location)[0]
+            data = {
+                "comm": {"g_tk": self.g_tk, "platform": "yqq", "ct": 24, "cv": 0},
+                "token": {
+                    "module": "QQConnectLogin.LoginServer",
+                    "method": "QQLogin",
+                    "param": {"code": code},
+                },
+            }
+            response = post(QQMUSIC_API, data=data)
+            if response == -1:
+                return -1
+            print(session.cookies.items())
             return 1
         else:
             return -1
-
-    def getLoginInfo(self):
+            
+    def check_login(self):
+        """检测登陆状态"""
         pass
