@@ -51,6 +51,7 @@ def main():
                 continue
             else:
                 break
+        break
 
 
 if __name__ == "__main__":

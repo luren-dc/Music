@@ -1,3 +1,4 @@
+import json
 import random
 import re
 import sys
@@ -195,23 +196,28 @@ class QQLogin:
                 "ui": self.uuid,
             }
             response = post(
-                LOGIN_AUTHORIZE, data=data, allow_redirects=False, verify=False
+                LOGIN_AUTHORIZE, params=params, data=data, allow_redirects=False, verify=False
             )
             if response == -1:
                 return -1
             location = response.headers.get("Location")
             if "code" not in location:
                 return -1
+            if get(location) == -1:
+                return -1
+            self.g_tk = get_token(session.cookies.get("p_skey"))
             code = re.findall(r"(?<=code=)(.+?)(?=&)", location)[0]
-            data = {
-                "comm": {"g_tk": self.g_tk, "platform": "yqq", "ct": 24, "cv": 0},
-                "token": {
-                    "module": "QQConnectLogin.LoginServer",
-                    "method": "QQLogin",
-                    "param": {"code": code},
-                },
-            }
-            response = post(QQMUSIC_API, data=data)
+            headers = {'content-type': 'application/x-www-form-urlencoded', 'Accept-Encoding': 'gzip, deflate, br'}
+            data = {"comm": {"g_tk": self.g_tk, "platform": "yqq", "ct": 24, "cv": 0},
+                    "req": {"module": "QQConnectLogin.LoginServer",
+                            "method": "QQLogin",
+                            "param": {"code": code}
+                            }
+                    }
+            print(data)
+            response = post(QQMUSIC_API, data=json.dumps(data), headers=headers)
+            print(session.headers.items())
+            print(response.text)
             if response == -1:
                 return -1
             print(session.cookies.items())
