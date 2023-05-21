@@ -1,6 +1,6 @@
 from multiprocessing import Process
 import time
-from music.uitls import login
+from music.utils import login
 
 
 def login_music():
