@@ -12,6 +12,7 @@ def login_music():
     Process(target=login.show_qrcode, args=(img,)).start()
     count_error = 0
     while True:
+        time.sleep(1)
         state = qq.check_state()
         print("\r" + " " * 20 + "\r", end="")
         if state == 4:
@@ -29,7 +30,10 @@ def login_music():
             print("\r获取错误 错误次数: %s" % count_error, end="")
         elif state:
             count_error = 0
-            qq.authorize()
+            print("\r扫码已成功 正在验证中",end="")
+            if qq.authorize() == -1:
+                print("\r验证失败",end="")l
+                return -1
             print("\rQQ: %s 登录成功" % state)
             break
 
@@ -46,7 +50,7 @@ def main():
     )
     while True:
         if login_music() == -1:
-            user_input = input("是否重新登陆?(Y/回车) ")
+            user_input = input("登陆失败 是否重新登陆?(Y/回车) ")
             if user_input == "" or user_input.lower() == "y":
                 continue
             else:

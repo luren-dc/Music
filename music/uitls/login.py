@@ -1,6 +1,6 @@
-import json
 import random
 import re
+import json
 import sys
 import time
 from io import BytesIO
@@ -59,7 +59,7 @@ def get_token(p_skey):
 
 
 def get_uuid():
-    """Generates a random UUID."""
+    """生成随机 UUID."""
     uuid_string = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
     def callback(c):
@@ -204,32 +204,39 @@ class QQLogin:
             )
             if response == -1:
                 return -1
-            location = response.headers.get("Location")
+            location = response.headers.get("Location", "")
             if "code" not in location:
                 return -1
-            if get(location) == -1:
+            if (
+                get(
+                    location,
+                    headers={"Referer": "https://graph.qq.com/", "Host": "y.qq.com"},
+                )
+                == -1
+            ):
                 return -1
-            self.g_tk = get_token(session.cookies.get("p_skey"))
             code = re.findall(r"(?<=code=)(.+?)(?=&)", location)[0]
             headers = {
                 "content-type": "application/x-www-form-urlencoded",
-                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Encoding": "gzip, deflate",
+                "Host": "u.y.qq.com",
+                "Origin": "https://y.qq.com",
             }
             data = {
-                "comm": {"g_tk": self.g_tk, "platform": "yqq", "ct": 24, "cv": 0},
+                "comm": {"g_tk": 5381, "platform": "yqq", "ct": 24, "cv": 0},
                 "req": {
                     "module": "QQConnectLogin.LoginServer",
                     "method": "QQLogin",
                     "param": {"code": code},
                 },
             }
-            print(data)
-            response = post(QQMUSIC_API, data=json.dumps(data), headers=headers)
-            print(session.headers.items())
-            print(response.text)
+            response = post(
+                QQMUSIC_API,
+                data=json.dumps(data, separators=(",", ":")),
+                headers=headers,
+            )
             if response == -1:
                 return -1
-            print(session.cookies.items())
             return 1
         else:
             return -1
