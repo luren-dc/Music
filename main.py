@@ -3,12 +3,12 @@ import time
 from music.utils import login
 
 
-def login_music():
+def login_music() -> int:
     print("正在获取登录二维码")
     qq = login.QQLogin()
     img = qq.get_qrcode()
     if img == -1:
-        return
+        return -1
     Process(target=login.show_qrcode, args=(img,)).start()
     count_error = 0
     while True:
@@ -17,7 +17,6 @@ def login_music():
         print("\r" + " " * 20 + "\r", end="")
         if state == 4:
             print("\r二维码已失效")
-            count_error = 0
             return -1
         elif state == 3:
             print("\r扫码成功，请确认登录", end="")
@@ -29,14 +28,16 @@ def login_music():
             count_error += 1
             print("\r获取错误 错误次数: %s" % count_error, end="")
         elif state:
-            count_error = 0
-            print("\r扫码已成功 正在验证中", end="")
+            print("\r扫码已成功 登录验证中", end="")
             if qq.authorize() == -1:
                 print("\r验证失败", end="")
                 return -1
+            print("\r登录验证成功 验证 skey 中", end="")
+            if qq.check_state() == -1:
+                print("\r验证失败", end="")
+                return -1
             print("\rQQ: %s 登录成功" % state)
-            qq.check_login()
-            break
+            return 1
 
 
 def main():

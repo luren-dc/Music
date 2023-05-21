@@ -13,12 +13,7 @@ from .http import (
     session,
 )
 
-from .encrypt import (
-    get_uuid,
-    get_ptqrtoken,
-    get_token,
-    get_sign
-)
+from .encrypt import get_uuid, get_ptqrtoken, get_token, get_sign
 
 # 获取二维码
 QQMUSIC_QRSHOW = "https://ssl.ptlogin2.qq.com/ptqrshow"
@@ -153,16 +148,16 @@ class QQLogin:
             self.g_tk = get_token(session.cookies.get("p_skey"))
             params = {
                 "Referer": "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id"
-                           "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
-                           "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
-                           "&use_customer_cb=0&state=state&display=pc",
+                "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
+                "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
+                "&use_customer_cb=0&state=state&display=pc",
                 "Content-Type": "application/x-www-form-urlencoded",
             }
             data = {
                 "response_type": "code",
                 "client_id": "100497308",
                 "redirect_uri": "https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https://y.qq.com"
-                                "/#&use_customer_cb=0",
+                "/#&use_customer_cb=0",
                 "scope": "",
                 "state": "state",
                 "switch": "",
@@ -187,11 +182,11 @@ class QQLogin:
             if "code" not in location:
                 return -1
             if (
-                    get(
-                        location,
-                        headers={"Referer": "https://graph.qq.com/", "Host": "y.qq.com"},
-                    )
-                    == -1
+                get(
+                    location,
+                    headers={"Referer": "https://graph.qq.com/", "Host": "y.qq.com"},
+                )
+                == -1
             ):
                 return -1
             code = re.findall(r"(?<=code=)(.+?)(?=&)", location)[0]
@@ -224,19 +219,37 @@ class QQLogin:
     def check_login(self):
         """检测登陆状态"""
         data = json.dumps(
-            {"comm": {"cv": 4747474, "ct": 24, "format": "json", "inCharset": "utf-8", "outCharset": "utf-8",
-                      "notice": 0, "platform": "yqq.json", "needNewCode": 1, "uin": self.qq_number,
-                      "g_tk_new_20200303": self.g_tk, "g_tk": self.g_tk},
-             "req_1": {"method": "get_favor_list", "param": {"userid": "3308862290", "fav_type": 1},
-                       "module": "music.favor_system_read"}}, separators=(",", ":"))
+            {
+                "comm": {
+                    "cv": 4747474,
+                    "ct": 24,
+                    "format": "json",
+                    "inCharset": "utf-8",
+                    "outCharset": "utf-8",
+                    "notice": 0,
+                    "platform": "yqq.json",
+                    "needNewCode": 1,
+                    "uin": self.qq_number,
+                    "g_tk_new_20200303": self.g_tk,
+                    "g_tk": self.g_tk,
+                },
+                "req_1": {
+                    "method": "get_favor_list",
+                    "param": {"userid": "3308862290", "fav_type": 1},
+                    "module": "music.favor_system_read",
+                },
+            },
+            separators=(",", ":"),
+        )
 
         params = {
             "_": str(int(time.time() * 10000)),
             "sign": get_sign(data),
         }
         print(data)
-        response = post("https://u.y.qq.com/cgi-bin/musics.fcg", data=data,
-                        params=params)
+        response = post(
+            "https://u.y.qq.com/cgi-bin/musics.fcg", data=data, params=params
+        )
         if "data" not in response.text:
             return -1
         else:
