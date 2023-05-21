@@ -32,7 +32,7 @@ def login_music():
             count_error = 0
             print("\r扫码已成功 正在验证中",end="")
             if qq.authorize() == -1:
-                print("\r验证失败",end="")l
+                print("\r验证失败",end="")
                 return -1
             print("\rQQ: %s 登录成功" % state)
             break

@@ -1,5 +1,4 @@
 import os
-import execjs
 
 
 # MusicBean
@@ -33,7 +32,7 @@ class Song(object):
         self.__mid = mid
 
     @id.setter
-    def mid(self, id: int) -> None:
+    def id(self, id: int) -> None:
         self.__id = id
 
     @name.setter
@@ -45,7 +44,7 @@ class Song(object):
         self.__artist = artist
 
     def __str__(self) -> str:
-        return "mid: %s\nid: %s\nname: %s\naritist: %s" % (
+        return "mid: %s\n id: %s\n name: %s\n artist: %s" % (
             self.__mid,
             self.__id,
             self.__name,
@@ -55,22 +54,9 @@ class Song(object):
     __repr__ = __str__
 
 
-def get_js() -> None:
-    js_path = os.path.dirname(os.path.realpath(__file__)) + "/sign.js"
-    with open(js_path, "r", encoding="utf-8") as f:
-        return f.read()
+def get_songs(id: int) -> list[Song]:
+    """获取 QQ音乐 歌单"""
+    pass
 
 
-JSContext = None
 
-
-# 初始化 JS 环境
-def init_js_context():
-    global JSContext
-    JSContext = execjs.compile(get_js())
-
-
-# Sign 计算方法
-def get_sign(data: str) -> str:
-    JSContext
-    return JSContext.call("getSign", data)

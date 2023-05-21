@@ -13,6 +13,12 @@ from .http import (
     session,
 )
 
+from .encrypt import (
+    get_uuid,
+    get_ptqrtoken,
+    get_token,
+)
+
 # 获取二维码
 QQMUSIC_QRSHOW = "https://ssl.ptlogin2.qq.com/ptqrshow"
 # 检验二维码状态
@@ -48,34 +54,6 @@ def show_qrcode(img_data):
                 print(char, end="")
             print()
     img.close()
-
-
-def get_token(p_skey):
-    """计算 g_tk"""
-    h = 5381
-    for c in p_skey:
-        h += (h << 5) + ord(c)
-    return 2147483647 & h
-
-
-def get_uuid():
-    """生成随机 UUID."""
-    uuid_string = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-
-    def callback(c):
-        r = random.randint(0, 15)
-        v = r if c == "x" else (r & 0x3 | 0x8)
-        return hex(v)[2:]
-
-    return "".join([callback(c) if c in ["x", "y"] else c for c in uuid_string]).upper()
-
-
-def get_ptqrtoken(qrsig):
-    """计算 ptqrtoken"""
-    e = 0
-    for c in qrsig:
-        e += (e << 5) + ord(c)
-    return 2147483647 & e
 
 
 class QQLogin:
@@ -174,16 +152,16 @@ class QQLogin:
             self.g_tk = get_token(session.cookies.get("p_skey"))
             params = {
                 "Referer": "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id"
-                "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
-                "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
-                "&use_customer_cb=0&state=state&display=pc",
+                           "=100497308&redirect_uri=https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https"
+                           "://y.qq.com/portal/profile.html#stat=y_new.top.user_pic&stat=y_new.top.pop.logout"
+                           "&use_customer_cb=0&state=state&display=pc",
                 "Content-Type": "application/x-www-form-urlencoded",
             }
             data = {
                 "response_type": "code",
                 "client_id": "100497308",
                 "redirect_uri": "https://y.qq.com/portal/wx_redirect.html?login_type=1&surl=https://y.qq.com"
-                "/#&use_customer_cb=0",
+                                "/#&use_customer_cb=0",
                 "scope": "",
                 "state": "state",
                 "switch": "",
@@ -208,11 +186,11 @@ class QQLogin:
             if "code" not in location:
                 return -1
             if (
-                get(
-                    location,
-                    headers={"Referer": "https://graph.qq.com/", "Host": "y.qq.com"},
-                )
-                == -1
+                    get(
+                        location,
+                        headers={"Referer": "https://graph.qq.com/", "Host": "y.qq.com"},
+                    )
+                    == -1
             ):
                 return -1
             code = re.findall(r"(?<=code=)(.+?)(?=&)", location)[0]
