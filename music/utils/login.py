@@ -64,7 +64,11 @@ class QQLogin:
         self.qqmusic_skey = None
 
     def get_qrcode(self) -> int | BytesIO:
-        """获取登录二维码"""
+        """
+        获取登录二维码
+
+        :return: 二维码图片
+        """
         self.uuid = get_uuid()
         params = {
             "appid": "716027609",
@@ -104,7 +108,11 @@ class QQLogin:
         return BytesIO(response.content)
 
     def check_state(self) -> int:
-        """获取登录二维码状态"""
+        """
+        获取登录二维码状态
+
+        :return: 二维码状态
+        """
         if self.url_refresh:
             return self.qq_number
         params = {
@@ -141,7 +149,11 @@ class QQLogin:
             return self.qq_number
 
     def authorize(self):
-        """登录验证"""
+        """
+        登录验证
+
+        :return: 验证状态
+        """
         if self.url_refresh is not None:
             if get(self.url_refresh, allow_redirects=False, verify=False) == -1:
                 return -1
@@ -212,12 +224,19 @@ class QQLogin:
             if response == -1:
                 return -1
             self.g_tk = get_token(session.cookies.get("qqmusic_key"))
+            from music.core import set_qq_info
+
+            set_qq_info(self.qq_number, self.g_tk)
             return 1
         else:
             return -1
 
     def check_login(self):
-        """检测登陆状态"""
+        """
+        检测登陆状态
+
+        :return: 登陆状态
+        """
         data = json.dumps(
             {
                 "comm": {

@@ -7,7 +7,7 @@ JSContext = None
 
 
 def __get_js() -> str:
-    js_path = os.path.dirname(os.path.realpath(__file__)) + "/sign.js"
+    js_path = os.path.dirname(os.path.realpath(__file__)) + "/qq_music.js"
     with open(js_path, "r", encoding="utf-8") as f:
         return f.read()
 

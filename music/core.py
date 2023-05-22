@@ -7,6 +7,7 @@ from music.utils.encrypt import get_sign
 qq_number = 0
 g_tk = 0
 
+
 # MusicBean
 class Song(object):
     __slots__ = ("__mid", "__id", "__name", "__artist", "__url")
@@ -61,6 +62,18 @@ class Song(object):
 
 
 QQMUSIC_API_URL = "https://u.y.qq.com/cgi-bin/musics.fcg"
+
+
+def set_qq_info(qq_num: int, tk: str) -> None:
+    """
+    设置 QQ 音乐 API 信息
+    :param qq_num: QQ 账号
+    :param tk: g_tk
+    :return:
+    """
+    global qq_number, g_tk
+    qq_number = qq_num
+    g_tk = tk
 
 
 def __request_api(data: dict) -> str | int:
