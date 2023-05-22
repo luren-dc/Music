@@ -1,5 +1,7 @@
 from multiprocessing import Process
 import time
+
+import music
 from music.utils import login
 
 
@@ -57,6 +59,8 @@ def main():
                 continue
             else:
                 break
+        song = input("要搜索的歌曲")
+        music.search(song, "song")
         break
 
 

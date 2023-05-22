@@ -1,5 +1,6 @@
 import os
 import random
+
 import execjs
 
 # JS 环境上下文
@@ -50,3 +51,23 @@ def get_ptqrtoken(qrsig):
     for c in qrsig:
         e += (e << 5) + ord(c)
     return 2147483647 & e
+
+
+SEARCH_TYPE = {
+    "song": 3,
+    "album": 4,
+    "playlist": 6,
+    "user": 13,
+    "lyric": 5,
+    "mv": 7,
+}
+
+
+def get_search_id(search_type: str) -> str:
+    """
+    计算 search_id
+
+    :param search_type:  搜索类型 song: 3 album: 4 playlist: 6 user: 13 lyric: 5 mv: 7
+    :return:
+    """
+    return str(JSContext.call("getSearchId", SEARCH_TYPE[search_type]))

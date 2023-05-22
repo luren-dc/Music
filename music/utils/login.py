@@ -1,19 +1,18 @@
+import json
 import random
 import re
-import json
 import sys
 import time
 from io import BytesIO
 
 from PIL import Image
 
+from .encrypt import get_uuid, get_ptqrtoken, get_token, get_sign
 from .http import (
     get,
     post,
     session,
 )
-
-from .encrypt import get_uuid, get_ptqrtoken, get_token, get_sign
 
 # 获取二维码
 QQMUSIC_QRSHOW = "https://ssl.ptlogin2.qq.com/ptqrshow"
@@ -254,7 +253,7 @@ class QQLogin:
                 },
                 "req_1": {
                     "method": "get_favor_list",
-                    "param": {"userid": "3308862290", "fav_type": 1},
+                    "param": {"userid": str(self.qq_number), "fav_type": 1},
                     "module": "music.favor_system_read",
                 },
             },

@@ -1,8 +1,8 @@
 import json
 import time
 
-import utils.http as requests
-from music.utils.encrypt import get_sign
+import music.utils.http as requests
+from music.utils.encrypt import get_sign, get_search_id
 
 qq_number = 0
 g_tk = 0
@@ -12,9 +12,9 @@ g_tk = 0
 class Song(object):
     __slots__ = ("__mid", "__id", "__name", "__artist", "__url")
 
-    def __init__(self, mid: int, id: int, name: str, artist: list[str]):
+    def __init__(self, mid: int, song_id: int, name: str, artist: list[str]):
         self.__mid = mid
-        self.__id = id
+        self.__id = song_id
         self.__name = name
         self.__artist = artist
 
@@ -39,7 +39,7 @@ class Song(object):
         self.__mid = mid
 
     @id.setter
-    def id(self, id: int) -> None:
+    def id(self, song_id: int) -> None:
         self.__id = id
 
     @name.setter
@@ -83,31 +83,36 @@ def __request_api(data: dict) -> str | int:
     :param data: 数据
     :return: 请求结果
     """
-    data = json.dumps(data, separators=(",", ":").encode("utf-8"))
+    data = json.dumps(data, separators=(",", ":"))
     params = {"_": str(int(time.time() * 10000)), "sign": get_sign(data)}
     response = requests.post(QQMUSIC_API_URL, params=params, data=data)
+    print(requests.session.cookies.items())
+    print(data)
     if response.status_code == 200:
         return response.text
     else:
         return -1
 
 
-def get_songs(id: int) -> list[Song]:
+def get_playlist(list_id: int) -> list[Song]:
     """
     获取 QQ音乐 歌单信息
 
-    :param id: 歌单 id
+    :param list_id: 歌单 id
     :return: 歌单信息
     """
     pass
 
 
-def search(name: str, type: int) -> list[Song]:
+SEARCH_TYPE = {"song": 0, "album": 2, "mv": 4, "playlist": 3, "user": 8, "lyric": 7}
+
+
+def search(query: str, search_type: str) -> list[Song]:
     """
     搜索
 
-    :param name: 搜索的关键词
-    :param type: 搜索的类型 0: 歌曲 2: 专辑 3: 歌单 4: MV
+    :param query: 搜索的关键词
+    :param search_type: 搜索的类型 song: 0 album: 2 mv: 4 playlist: 3 user: 8 lyric: 7
     :return: 搜索的结果
     """
     data = {
@@ -120,20 +125,21 @@ def search(name: str, type: int) -> list[Song]:
             "notice": 0,
             "platform": "yqq.json",
             "needNewCode": 1,
-            "uin": 3308862290,
-            "g_tk_new_20200303": 617682219,
-            "g_tk": 617682219,
+            "uin": qq_number,
+            "g_tk_new_20200303": g_tk,
+            "g_tk": g_tk,
         },
         "req_1": {
             "method": "DoSearchForQQMusicDesktop",
             "module": "music.search.SearchCgiService",
             "param": {
                 "remoteplace": "txt.yqq.song",
-                "searchid": "56304152276655618",
-                "search_type": 0,
-                "query": name,
+                "searchid": get_search_id(search_type),
+                "search_type": SEARCH_TYPE[search_type],
+                "query": query,
                 "page_num": 1,
                 "num_per_page": 10,
             },
         },
     }
+    print(__request_api(data))
