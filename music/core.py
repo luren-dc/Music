@@ -41,7 +41,7 @@ class Song(object):
 
     @id.setter
     def id(self, song_id: int) -> None:
-        self.__id = id
+        self.__id = song_id
 
     @name.setter
     def name(self, name: str) -> None:
@@ -91,7 +91,7 @@ def __request_api(data: dict) -> Callable[[dict[str, Any]], Any] | int:
         "origin": "https://y.qq.com",
         "accept": "application/json",
     }
-    response = requests.post(QQMUSIC_API_URL, headers=headers, params=params, json=data)
+    response = requests.post(QQMUSIC_API_URL, headers=headers, params=params, data=data)
     if response.status_code == 200:
         return response.json()
     else:
@@ -111,12 +111,14 @@ def get_playlist(list_id: int) -> list[Song]:
 SEARCH_TYPE = {"song": 0, "album": 2, "mv": 4, "playlist": 3, "user": 8, "lyric": 7}
 
 
-def search(query: str, search_type: str) -> list[Song] | int:
+def search(query: str, search_type: str, p: int = 1, num: int = 10) -> list[Song] | int:
     """
     搜索
 
     :param query: 搜索的关键词
     :param search_type: 搜索的类型 song: 0 album: 2 mv: 4 playlist: 3 user: 8 lyric: 7
+    :param p: 页数
+    :param num: 每页数量
     :return: 搜索的结果
     """
     data = {
@@ -141,8 +143,8 @@ def search(query: str, search_type: str) -> list[Song] | int:
                 "searchid": get_search_id(search_type),
                 "search_type": SEARCH_TYPE[search_type],
                 "query": query,
-                "page_num": 1,
-                "num_per_page": 10,
+                "page_num": p,
+                "num_per_page": num,
             },
         },
     }
