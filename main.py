@@ -1,13 +1,25 @@
+import os
 from multiprocessing import Process
 import time
 
 import music
+import music.utils.http as http
 from music.utils import login
 
 
 def login_music() -> int:
-    print("正在获取登录二维码")
     qq = login.QQLogin()
+    file_name = os.path.dirname(os.path.realpath(__file__)) + "/data/cookies.txt"
+    if os.path.exists(file_name):
+        print("正在验证 cookies 是否失效")
+        http.get_cookies()
+        state = qq.check_login()
+        if state != -1:
+            print("\rQQ: %s 登录成功" % state)
+            return 1
+        else:
+            print("cookies 失效")
+    print("正在获取登录二维码")
     img = qq.get_qrcode()
     if img == -1:
         return -1
@@ -39,6 +51,7 @@ def login_music() -> int:
                 print("\r验证失败", end="")
                 return -1
             print("\rQQ: %s 登录成功" % state)
+            http.save_cookies()
             return 1
 
 

@@ -230,12 +230,16 @@ class QQLogin:
         else:
             return -1
 
-    def check_login(self):
+    def check_login(self) -> int:
         """
         检测登陆状态
 
         :return: 登陆状态
         """
+        if self.qq_number is None:
+            self.qqmusic_skey = session.cookies.get("qqmusic_key")
+            self.qq_number = session.cookies.get("uin")
+            self.g_tk = get_token(self.qqmusic_skey)
         data = json.dumps(
             {
                 "comm": {
@@ -270,4 +274,4 @@ class QQLogin:
         if "data" not in response.text:
             return -1
         else:
-            return 1
+            return self.qq_number

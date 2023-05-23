@@ -4,7 +4,6 @@ from typing import Callable, Any
 
 import music.utils.http as requests
 from music.utils.encrypt import get_sign, get_search_id
-from urllib.parse import urlencode
 
 qq_number = 0
 g_tk = 0
@@ -86,15 +85,13 @@ def __request_api(data: dict) -> Callable[[dict[str, Any]], Any] | int:
     :return: 请求结果
     """
     data = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
-    print(data)
     params = {"_": str(int(time.time() * 1000)), "sign": get_sign(data)}
     headers = {
         "Host": "u.y.qq.com",
         "origin": "https://y.qq.com",
         "accept": "application/json",
-        "content-type": "application/x-www-form-urlencoded",
     }
-    response = requests.post(QQMUSIC_API_URL, headers=headers, params=params, data=data)
+    response = requests.post(QQMUSIC_API_URL, headers=headers, params=params, json=data)
     if response.status_code == 200:
         return response.json()
     else:
