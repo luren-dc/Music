@@ -42,6 +42,9 @@ def login_music() -> int:
             return 1
 
 
+is_login = 0
+
+
 def main():
     print(
         "\033[34m.___  ___.  __    __       _______. __    ______ \n"
@@ -52,17 +55,23 @@ def main():
         "|__|  |__|  \______/  |_______/    |__|  \______|\033[0m\n"
         "    "
     )
+    global is_login
     while True:
-        if login_music() == -1:
-            user_input = input("登陆失败 是否重新登陆?(Y/回车) ")
-            if user_input == "" or user_input.lower() == "y":
-                continue
+        if not is_login:
+            if login_music() == -1:
+                user_input = input("登陆失败 是否重新登陆?(Y/回车) ")
+                if user_input == "" or user_input.lower() == "y":
+                    continue
+                else:
+                    break
             else:
-                break
+                is_login = 1
         time.sleep(3)
-        song = input("要搜索的歌曲")
-        music.search(song, "song")
-        break
+        song = input("要搜索的歌曲\n")
+        data = music.search(song, "song")
+        print(len(data))
+        for d in data:
+            print(str(d))
 
 
 if __name__ == "__main__":

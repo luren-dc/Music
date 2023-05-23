@@ -1,8 +1,10 @@
 import json
 import time
+from typing import Callable, Any
+
 import music.utils.http as requests
 from music.utils.encrypt import get_sign, get_search_id
-from urllib import parse
+from urllib.parse import urlencode
 
 qq_number = 0
 g_tk = 0
@@ -76,14 +78,15 @@ def set_qq_info(qq_num: int, tk: int) -> None:
     g_tk = int(tk)
 
 
-def __request_api(data: dict) -> dict | int:
+def __request_api(data: dict) -> Callable[[dict[str, Any]], Any] | int:
     """
     请求 QQ音乐 API
 
     :param data: 数据
     :return: 请求结果
     """
-    data = json.dumps(data, separators=(",", ":"))
+    data = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+    print(data)
     params = {"_": str(int(time.time() * 1000)), "sign": get_sign(data)}
     headers = {
         "Host": "u.y.qq.com",
@@ -92,10 +95,8 @@ def __request_api(data: dict) -> dict | int:
         "content-type": "application/x-www-form-urlencoded",
     }
     response = requests.post(QQMUSIC_API_URL, headers=headers, params=params, data=data)
-    print(data)
-    print(response.url)
     if response.status_code == 200:
-        return response.json
+        return response.json()
     else:
         return -1
 
@@ -142,7 +143,7 @@ def search(query: str, search_type: str) -> list[Song] | int:
                 "remoteplace": "txt.yqq.song",
                 "searchid": get_search_id(search_type),
                 "search_type": SEARCH_TYPE[search_type],
-                "query": parse.quote(query),
+                "query": query,
                 "page_num": 1,
                 "num_per_page": 10,
             },
@@ -151,5 +152,14 @@ def search(query: str, search_type: str) -> list[Song] | int:
     data = __request_api(data)
     if data == -1:
         return -1
-    with open("data.json", "w") as file:
-        print(json.dumps(data, indent=4, ensure_ascii=False), file=file)
+    # print(json.dumps(data, indent=4))
+    data = data["req_1"]["data"]["body"]["song"]["list"]
+    songs = []
+    for song in data:
+        artist = []
+        for artist_ in song["singer"]:
+            artist.append(artist_["name"])
+        song = Song(song["mid"], song["id"], song["name"], artist)
+        songs.append(song)
+    songs.reverse()
+    return songs
