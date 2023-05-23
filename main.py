@@ -59,6 +59,7 @@ def main():
                 continue
             else:
                 break
+        time.sleep(3)
         song = input("要搜索的歌曲")
         music.search(song, "song")
         break

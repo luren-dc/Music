@@ -264,7 +264,6 @@ class QQLogin:
             "_": str(int(time.time() * 10000)),
             "sign": get_sign(data),
         }
-        print(data)
         response = post(
             "https://u.y.qq.com/cgi-bin/musics.fcg", data=data, params=params
         )

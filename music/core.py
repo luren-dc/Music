@@ -1,8 +1,8 @@
 import json
 import time
-
 import music.utils.http as requests
 from music.utils.encrypt import get_sign, get_search_id
+from urllib import parse
 
 qq_number = 0
 g_tk = 0
@@ -64,7 +64,7 @@ class Song(object):
 QQMUSIC_API_URL = "https://u.y.qq.com/cgi-bin/musics.fcg"
 
 
-def set_qq_info(qq_num: int, tk: str) -> None:
+def set_qq_info(qq_num: int, tk: int) -> None:
     """
     设置 QQ 音乐 API 信息
     :param qq_num: QQ 账号
@@ -72,11 +72,11 @@ def set_qq_info(qq_num: int, tk: str) -> None:
     :return:
     """
     global qq_number, g_tk
-    qq_number = qq_num
-    g_tk = tk
+    qq_number = int(qq_num)
+    g_tk = int(tk)
 
 
-def __request_api(data: dict) -> str | int:
+def __request_api(data: dict) -> dict | int:
     """
     请求 QQ音乐 API
 
@@ -84,12 +84,18 @@ def __request_api(data: dict) -> str | int:
     :return: 请求结果
     """
     data = json.dumps(data, separators=(",", ":"))
-    params = {"_": str(int(time.time() * 10000)), "sign": get_sign(data)}
-    response = requests.post(QQMUSIC_API_URL, params=params, data=data)
-    print(requests.session.cookies.items())
+    params = {"_": str(int(time.time() * 1000)), "sign": get_sign(data)}
+    headers = {
+        "Host": "u.y.qq.com",
+        "origin": "https://y.qq.com",
+        "accept": "application/json",
+        "content-type": "application/x-www-form-urlencoded",
+    }
+    response = requests.post(QQMUSIC_API_URL, headers=headers, params=params, data=data)
     print(data)
+    print(response.url)
     if response.status_code == 200:
-        return response.text
+        return response.json
     else:
         return -1
 
@@ -107,7 +113,7 @@ def get_playlist(list_id: int) -> list[Song]:
 SEARCH_TYPE = {"song": 0, "album": 2, "mv": 4, "playlist": 3, "user": 8, "lyric": 7}
 
 
-def search(query: str, search_type: str) -> list[Song]:
+def search(query: str, search_type: str) -> list[Song] | int:
     """
     搜索
 
@@ -136,10 +142,14 @@ def search(query: str, search_type: str) -> list[Song]:
                 "remoteplace": "txt.yqq.song",
                 "searchid": get_search_id(search_type),
                 "search_type": SEARCH_TYPE[search_type],
-                "query": query,
+                "query": parse.quote(query),
                 "page_num": 1,
                 "num_per_page": 10,
             },
         },
     }
-    print(__request_api(data))
+    data = __request_api(data)
+    if data == -1:
+        return -1
+    with open("data.json", "w") as file:
+        print(json.dumps(data, indent=4, ensure_ascii=False), file=file)
