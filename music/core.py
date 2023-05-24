@@ -84,8 +84,8 @@ def __request_api(data: dict) -> Callable[[dict[str, Any]], Any] | int:
     :param data: 数据
     :return: 请求结果
     """
-    data = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
-    params = {"_": str(int(time.time() * 1000)), "sign": get_sign(data)}
+    data = json.dumps(data, separators=(",", ":"), ensure_ascii=False).encode('utf-8')
+    params = {"_": str(int(time.time() * 1000)), "sign": get_sign(data.decode('utf-8'))}
     headers = {
         "Host": "u.y.qq.com",
         "origin": "https://y.qq.com",
