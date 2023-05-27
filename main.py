@@ -1,6 +1,6 @@
 import os
-from multiprocessing import Process
 import time
+from multiprocessing import Process
 
 import music
 import music.utils.http as http
@@ -9,7 +9,9 @@ from music.utils import login
 
 def login_music() -> int:
     qq = login.QQLogin()
-    COOKIES_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "cookies.txt")
+    COOKIES_FILE = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "data", "cookies.txt"
+    )
     if os.path.exists(COOKIES_FILE):
         print("正在验证 cookies 是否失效")
         http.get_cookies()
@@ -54,6 +56,7 @@ def login_music() -> int:
             return 1
         time.sleep(1)
 
+
 def print_logo():
     """
     打印 Logo
@@ -67,6 +70,7 @@ def print_logo():
         "|__|  |__|  \\______/  |_______/    |__|  \\______|\033[0m\n"
         "    "
     )
+
 
 def song_search():
     """
@@ -98,6 +102,7 @@ def playlist_download():
     except Exception as e:
         print("出现错误：", e)
 
+
 def main_menu():
     """主菜单"""
     print("=" * 40)
@@ -112,7 +117,8 @@ def main_menu():
     print("[!] 退出")
 
     print("=" * 40)
-        
+
+
 def main():
     """
     主函数
@@ -140,5 +146,6 @@ def main():
         else:
             print("请输入正确的序号！")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

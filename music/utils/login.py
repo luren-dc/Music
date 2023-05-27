@@ -7,12 +7,8 @@ from io import BytesIO
 
 from PIL import Image
 
-from .encrypt import get_uuid, get_ptqrtoken, get_token, get_sign
-from .http import (
-    get,
-    post,
-    session,
-)
+from .encrypt import get_ptqrtoken, get_sign, get_token, get_uuid
+from .http import get, post, session
 
 # 获取二维码
 QQMUSIC_QRSHOW = "https://ssl.ptlogin2.qq.com/ptqrshow"

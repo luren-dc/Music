@@ -1,10 +1,10 @@
 import json
-import time
 import random
-from typing import Callable, Any
+import time
+from typing import Any, Callable
 
 import music.utils.http as requests
-from music.utils.encrypt import get_sign, get_search_id
+from music.utils.encrypt import get_search_id, get_sign
 
 qq_number = 0
 g_tk = 0
