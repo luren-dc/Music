@@ -271,7 +271,7 @@ class QQLogin:
         response = post(
             "https://u.y.qq.com/cgi-bin/musics.fcg", data=data, params=params
         )
-        if "data" not in response.text:
+        if response.json()["code"] != 0:
             return -1
         else:
             return self.qq_number

@@ -9,8 +9,8 @@ from music.utils import login
 
 def login_music() -> int:
     qq = login.QQLogin()
-    file_name = os.path.dirname(os.path.realpath(__file__)) + "/data/cookies.txt"
-    if os.path.exists(file_name):
+    COOKIES_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "cookies.txt")
+    if os.path.exists(COOKIES_FILE):
         print("正在验证 cookies 是否失效")
         http.get_cookies()
         state = qq.check_login()
@@ -26,7 +26,6 @@ def login_music() -> int:
     Process(target=login.show_qrcode, args=(img,)).start()
     count_error = 0
     while True:
-        time.sleep(1)
         state = qq.check_state()
         print("\r" + " " * 20 + "\r", end="")
         if state == 4:
@@ -53,39 +52,93 @@ def login_music() -> int:
             print("\rQQ: %s 登录成功" % state)
             http.save_cookies()
             return 1
+        time.sleep(1)
 
-
-is_login = 0
-
-
-def main():
+def print_logo():
+    """
+    打印 Logo
+    """
     print(
         "\033[34m.___  ___.  __    __       _______. __    ______ \n"
-        "|   \/   | |  |  |  |     /       ||  |  /      |\n"
-        "|  \  /  | |  |  |  |    |   (----`|  | |  ,----'\n"
-        "|  |\/|  | |  |  |  |     \   \    |  | |  |     \n"
+        "|   \\/   | |  |  |  |     /       ||  |  /      |\n"
+        "|  \\  /  | |  |  |  |    |   (----`|  | |  ,----'\n"
+        "|  |\\/|  | |  |  |  |     \\   \\    |  | |  |     \n"
         "|  |  |  | |  `--'  | .----)   |   |  | |  `----.\n"
-        "|__|  |__|  \______/  |_______/    |__|  \______|\033[0m\n"
+        "|__|  |__|  \\______/  |_______/    |__|  \\______|\033[0m\n"
         "    "
     )
-    global is_login
-    while True:
-        if not is_login:
-            if login_music() == -1:
-                user_input = input("登陆失败 是否重新登陆?(Y/回车) ")
-                if user_input == "" or user_input.lower() == "y":
-                    continue
-                else:
-                    break
-            else:
-                is_login = 1
-        time.sleep(3)
-        song = input("要搜索的歌曲\n")
+
+def song_search():
+    """
+    歌曲搜索
+    """
+    song = input("请输入要搜索的歌曲名: ")
+    try:
         data = music.search(song, "song")
-        print(len(data))
-        for d in data:
-            print(str(d))
+        print(f"共找到 {len(data)} 首歌曲：")
+        for i, result in enumerate(data[:10], 1):
+            print(f"{i}. {result.name} - {' & '.join(result.artist)}")
+        index = int(input("请输入要下载的歌曲序号: ")) - 1
+        data = music.get_download_url([data[index].mid])
+        print(f"下载链接：{data}")
+    except Exception as e:
+        print("出现错误：", e)
 
 
-if __name__ == "__main__":
+def playlist_download():
+    """
+    歌单下载
+    """
+    songlist_id = input("请输入要下载的歌单 ID: ")
+    try:
+        data = music.get_playlist(int(songlist_id))
+        mid = [data.mid for data in data]
+        data = music.get_download_url(mid)
+        print(f"下载链接：{data}")
+    except Exception as e:
+        print("出现错误：", e)
+
+def main_menu():
+    """主菜单"""
+    print("=" * 40)
+    print("    Music Downloader v1.0 by Luren")
+    print("=" * 40)
+    print("请选择要使用的功能：")
+    print("[1] 歌曲搜索")
+    print("[2] 歌单下载")
+    print("[3] 下载历史")
+    print("[4] 设置")
+    print("[5] 关于")
+    print("[!] 退出")
+
+    print("=" * 40)
+        
+def main():
+    """
+    主函数
+    """
+    # 打印 Logo
+    print_logo()
+
+    # 登录
+    is_login = login_music()
+
+    while is_login:
+        # 输出菜单
+        main_menu()
+        # 循环读取用户的输入
+        while True:
+            chose = input("请输入序号: ")
+            break
+        # 根据用户输入选择相应的功能
+        if chose == "1":
+            song_search()
+        elif chose == "2":
+            playlist_download()
+        elif chose == "!":
+            exit()
+        else:
+            print("请输入正确的序号！")
+
+if __name__ == '__main__':
     main()
