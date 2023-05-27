@@ -173,8 +173,6 @@ def search(query: str, search_type: str, p: int = 1, num: int = 10) -> list[Song
     data = __request_api(data)
     if data == -1:
         return -1
-    with open("/storage/emulated/0/Documents/data1.json", "w") as f:
-        print(json.dumps(data, indent=4), file=f)
     data = data["req_1"]["data"]["body"][search_type]
     if search_type == "song":
         data = data["list"]
